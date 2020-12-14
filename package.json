@@ -1,0 +1,28 @@
+{
+  "name": "@kul-kus/esy",
+  "version": "1.0.1",
+  "description": "esy is a Command Line Interface tool that simplifies basic git operations. Also, it simplifies account switching in webMethods.io Integration connectors along with performing various CRUD operations in accounts.",
+  "bin": {
+    "esy": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kuldeep Kushwaha",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.0.0",
+    "cli-spinners": "^2.4.0",
+    "cli-table3": "^0.6.0",
+    "clipboardy": "^2.3.0",
+    "colors": "^1.4.0",
+    "inquire": "^0.4.8",
+    "ora": "^5.1.0",
+    "strip-ansi": "^6.0.0",
+    "typy": "^3.3.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

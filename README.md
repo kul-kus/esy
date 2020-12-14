@@ -41,14 +41,14 @@ Pushes changes to your git repository. It provides you with an interactive CLI u
 ``` bash
   esy push <commit_message>
 ```
-![Push](Images/push.png)
+![Push](https://github.com/kul-kus/esy/blob/master/Images/push.png?raw=true)
 
 ## pull
 Pulls changes from git repository.
 ``` bash
   esy pull
 ```
-![Pull](./Images/pull.png)
+![Pull](https://github.com/kul-kus/esy/blob/master/Images/pull.png?raw=true)
 
 
 ## checkout
@@ -56,7 +56,7 @@ Checks out to a specific branch and pulls latest changes from the selected branc
 ``` bash
   esy checkout 
 ```
-![Checkout](./Images/checkout.png?raw=true)
+![Checkout](https://github.com/kul-kus/esy/blob/master/Images/checkout.png?raw=true)
 
 
 ## branch
@@ -116,7 +116,8 @@ Use this to kill any running process.
 ``` bash
   esy kill <port_number>
 ```
-![Kill](./Images/kill.png?raw=true "Kill")
+![Checkout](https://github.com/kul-kus/esy/blob/master/Images/kill.png?raw=true)
+
 
 
 ## schema
@@ -128,11 +129,17 @@ Use this schema for specified object.
 ## help
 Use this command to list all the commands you can use.
 ``` bash
-  wmio help
+  esy help
 ```
 
 ## version
 Use this command to list current version of your esy npm.
 ``` bash
-  wmio version
+  esy version
 ```
+
+<!-- ## Homepage
+[github.com/kul-kus/esy#readme](https://github.com/kul-kus/esy#readme)
+
+## Repository
+[github.com/kul-kus/esy](https://github.com/kul-kus/esy) -->

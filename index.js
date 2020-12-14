@@ -17,9 +17,6 @@ let command = parameters.splice(0, 1)
 if (command && Array.isArray(command) && command.length) {
   command = command[0].toLocaleLowerCase()
 }
-// console.log("command", command)
-// console.log("parameters", parameters)
-
 if (parameters && parameters.length) {
   let tempParam = []
   parameters.forEach(element => {
@@ -68,39 +65,6 @@ else if (command == "delete") {
 else if (command == "rename") {
   return commandFun.rename(parameters)
 } 
-
-
-// else if (command == "nightmode" || command == "dim") {
-//   return commandFun.nightmode(parameters)
-// }
-// else if (command == "vscode" || command == "wmio") {
-//   return commandFun.vsCode()
-// } 
-// else if (command == "create_common") {
-//   return createCommon.copy_common()
-// } 
-// else if (command == "migrate") {
-//   return migrate.migrate()
-// }
-// else if (command == "shutdown" || command == "off" || command == "poweroff") {
-//   return commandFun.shutdown()
-// }
-// else if (command == "reboot" || command == "restart") {
-//   return commandFun.restart()
-// }
-// else if (command == "git") {
-//   parameters.unshift("git")
-//   return require("./command/open").open(parameters)
-// }
-// else if (command == "code") {
-//   parameters.unshift("code")
-//   return require("./command/open").open(parameters)
-// }
-// else if (command == "open") {
-//   return require("./command/open").open(parameters)
-// }
-
-
 
 else if (command == "push") {
   return require("./command/Git/push").push(parameters)

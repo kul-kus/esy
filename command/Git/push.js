@@ -48,6 +48,7 @@ module.exports = {
             if (gitSatusData && Array.isArray(gitSatusData) && gitSatusData.length && gitSatusData.indexOf("nothing to commit, working tree clean") == -1) {
 
                 let gitStatusData2 = await gitStatus(pwd, "git status -s", "Fetching Git Changes")
+                // console.log("gitStatusData2=====>", gitStatusData2)
 
                 // console.log(chalk.keyword("pink")("  Files Changed"))
                 // console.log(chalk.keyword("grey")("  " + gitStatusData2.join('\n')))
@@ -104,6 +105,7 @@ function gitStatus(pwd, command, spinnerTxt) {
 
 
 function addChanges(pwd, addStingMess) {
+    console.log("addChanges -> addStingMess", addStingMess)
     return new Promise((res, rej) => {
         console.log(chalk.keyword("magenta")("  Command Initiated: "), addStingMess)
         gitComm.startSpinner(oraspinner, "Adding changes to Git Repository", "none")
@@ -249,6 +251,7 @@ function getAllFilesModified(data) {
     let commitModified1 = data.filter(curr => curr.startsWith("MM "))
 
     commitModified = commitModified.concat(commitModified1)
+    // console.log("getAllFilesModified -> commitModified==>", commitModified)
     let commitDeleted = data.filter(curr => curr.startsWith("D "))
     let commitAdded = data.filter(curr => curr.startsWith("??"))
     let conflict = data.filter(curr => curr.startsWith("UU"))
@@ -266,6 +269,7 @@ function getAllFilesModified(data) {
     }
     if (commitModified.length) {
         commitModified.forEach(curr => {
+            console.log("getAllFilesModified -> curr", curr)
             curr = curr.replace("M ", "")
             commitFilesList.push({
                 name: chalk.keyword("lightgreen")(" Modified: ") + curr,
@@ -289,6 +293,12 @@ function getAllFilesModified(data) {
             })
         })
     }
+    commitFilesList = commitFilesList.map(curr => {
+        if (curr["name"].includes('"')) {
+            curr["name"] = curr["name"].replace(/\"/g, "")
+        }
+        return curr
+    })
     return commitFilesList
 }
 
@@ -317,13 +327,13 @@ function GetSelctedCommitFiles(arr) {
                 answers.files.forEach(curr => {
                     curr = stripAnsi(curr).trim()
                     if (curr.includes("Added: ")) {
-                        curr = curr.replace("Added: ", "")
+                        curr = comm.addEscapeToSpace(curr.replace("Added: ", ""))
                     }
                     if (curr.includes("Modified: ")) {
-                        curr = curr.replace("Modified: ", "")
+                        curr = comm.addEscapeToSpace(curr.replace("Modified: ", ""))
                     }
                     if (curr.includes("Deleted: ")) {
-                        curr = curr.replace("Deleted: ", "")
+                        curr = comm.addEscapeToSpace(curr.replace("Deleted: ", ""))
                     }
                     command += " " + curr.trim()
                 });

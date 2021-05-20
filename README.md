@@ -1,7 +1,7 @@
 ## Installation
 In order to get started with ‘esy’, you will first need to install it on your system. To do so, run the following command:
 ``` bash
-npm i @kul/esy -g
+npm i @kul-kus/esy -g
 ```
 
 >NOTE: For Ubuntu OS, make sure to run the 'esy store' command before using any git commands.

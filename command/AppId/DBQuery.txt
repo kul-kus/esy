@@ -1,0 +1,20 @@
+[
+    {"$match":{"global":true}},
+    {
+      $group: {
+        _id: { global: "$global" },
+        apps: {
+          $addToSet: {
+            uid: "$uid",
+            guid: "$guid",
+            title: "$title",
+            triggers: "$triggers",
+            actions: "$actions",
+            global: "$global",
+            published:"$published",
+            owner: "$owner",
+          },
+        },
+      },
+    },
+  ]

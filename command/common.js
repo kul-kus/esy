@@ -104,7 +104,6 @@ module.exports = {
     checkIfFileExist: function (fileName) {
         return new Promise(async function (res, rej) {
             try {
-
                 let FileList = await self.getFileList()
                 return (FileList.includes(fileName)) ? res(true) : res(false)
             } catch (error) {
@@ -359,16 +358,6 @@ module.exports = {
                 return rej(error)
             }
         })
-    },
-    checkIfFileExist: function (path, name) {
-        return new Promise((res, rej) => {
-            if (fs.existsSync(path)) {
-                return res(true)
-            } else {
-                return rej(`File doesnot exist in config ${name}`)
-            }
-        })
-
     },
     copyFileFS: function (source, dest) {
         return new Promise((res, rej) => {

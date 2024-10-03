@@ -5,9 +5,23 @@ var AppID = require("./AppId/appid")
 var basefile = "config.json"
 const { spawn } = require('child_process');
 let chalk = require("chalk")
+const fs = require('fs');
 
 
 var path = require('path')
+
+function checkIfFileExist2(path, name, type) {
+    return new Promise((res, rej) => {
+        if (fs.existsSync(path)) {
+            return res(true)
+        } else {
+            if (type == "string") {
+                return rej(`File doesnot exist config ${name}`)
+            }
+            return res(false)
+        }
+    })
+}
 
 async function deploy() {
     try {
@@ -15,7 +29,7 @@ async function deploy() {
         let connDetails = await commAppID.getConnectorData()
         let targetEnv = await comm.showOptionsSearch(connDetails["env"], "Select the Target Enviroment on which the connector is to deployed.")
 
-        await comm.checkIfFileExist(`${comm.wmioPath}/${targetEnv}.json`, `${targetEnv}.json`)
+        await checkIfFileExist2(`${comm.wmioPath}/${targetEnv}.json`, `${targetEnv}.json`, "string")
         await comm.copyFileFS(`${comm.wmioPath}/${targetEnv}.json`, `${comm.wmioPath}/${basefile}`)
         let cofigData = await comm.readFileFS(basefile)
         if (cofigData && typeof cofigData == "string") {
@@ -34,8 +48,15 @@ async function deploy() {
         await AppID.replaceAppId(targetEnv)
         if (await comm.confirmOptions(`Do you want to initate the sudowmio deploy?`)) {
 
+            const currConnDirectory = await comm.getCurrentPWD()
+            if (await checkIfFileExist2(`${currConnDirectory}/index.js`, "index.js", "boolean")) {
+                fs.unlinkSync(`${currConnDirectory}/index.js`)
+                comm.showMessageRandom("\nindex.js file deleted successfully.\n", "grey")
+            }
+
             const command = 'sudowmio';
             const args = ["deploy"];
+
 
             // Spawn the child process
             const deployProcess = spawn(command, args);

@@ -37,7 +37,7 @@ async function searchConnector() {
         let targetEnvConnDetailsObj = formObject(targetEnvConnDetails)
         let searchKey = await comm.showOptionsSearch(Object.keys(targetEnvConnDetailsObj), "Select the connector.")
 
-        console.log(targetEnvConnDetailsObj[searchKey])
+        // console.log(targetEnvConnDetailsObj[searchKey])
         let finalData = targetEnvConnDetailsObj[searchKey]
         if (finalData && typeof finalData == "string") {
             finalData = JSON.parse(finalData)

@@ -1,7 +1,4 @@
 
-
-
-
 var commAppID = require("./common")
 var comm = require("../common")
 let chalk = require("chalk")
@@ -39,14 +36,24 @@ async function replaceAppId(enviroment) {
                 comm.showMessageHex(`Multiple Connector entry present with guid: ${guid} in enviroment ${targetEnv}`, "#e88388")
             } else {
                 let allFiles = await commAppID.getAllFilesInFolder(currConnDirectory, ignoreFoldersArr)
-                await commAppID.replaceStringInFile(allFiles, appId, targetEnvConneData[0]["uid"])
 
-                console.log(
-                    chalk.hex(comm.hexColors.green)(`\n AppID succesfully replaced to`),
-                    chalk.keyword("green")(`${targetEnvConneData[0]["uid"]}`),
-                    chalk.hex(comm.hexColors.green)(` in Connector`),
-                    chalk.keyword("green")(`${targetEnvConneData[0]["title"]}\n`)
-                )
+                if (appId == targetEnvConneData[0]["uid"]) {
+                    console.log(
+                        chalk.hex(comm.hexColors.green)(`\n AppID`),
+                        chalk.keyword("green")(`${targetEnvConneData[0]["uid"]}`),
+                        chalk.hex(comm.hexColors.green)(` is same for the `),
+                        chalk.keyword("green")(`${targetEnvConneData[0]["title"]}`),
+                        chalk.hex(comm.hexColors.green)(` Connector\n`),
+                    )
+                } else {
+                    await commAppID.replaceStringInFile(allFiles, appId, targetEnvConneData[0]["uid"])
+                    console.log(
+                        chalk.hex(comm.hexColors.green)(`\n AppID succesfully replaced to`),
+                        chalk.keyword("green")(`${targetEnvConneData[0]["uid"]}`),
+                        chalk.hex(comm.hexColors.green)(` in Connector`),
+                        chalk.keyword("green")(`${targetEnvConneData[0]["title"]}\n`)
+                    )
+                }
 
                 // comm.showMessageOrange(`\n AppID succesfully replaced to ${targetEnvConneData[0]["uid"]} in Connector ${targetEnvConneData[0]["title"]} \n`)
                 return resolve()
@@ -54,7 +61,7 @@ async function replaceAppId(enviroment) {
 
         } catch (error) {
             comm.showMessageHex(`${error}`, "#e88388")
-            return reject()
+            return reject("")
         }
     })
 }

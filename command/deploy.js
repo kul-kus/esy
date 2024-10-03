@@ -6,6 +6,7 @@ var basefile = "config.json"
 const { spawn } = require('child_process');
 let chalk = require("chalk")
 const fs = require('fs');
+const inquirer = require('inquirer');
 
 
 var path = require('path')
@@ -23,6 +24,59 @@ function checkIfFileExist2(path, name, type) {
     })
 }
 
+async function intiateDeployment() {
+    const command = 'sudowmio';
+    const args = ["deploy"];
+
+
+    // Spawn the child process
+    const deployProcess = spawn(command, args);
+    deployProcess.stdout.on('data', (data) => {
+        let dataArr = String(data).split("[INFO]")
+        if (dataArr.length > 1) {
+            console.log(
+                chalk.keyword("orange")(`${dataArr[0]}`),
+                chalk.keyword("white")(`[`),
+                chalk.keyword("green")(`INFO`),
+                chalk.keyword("white")(`]`),
+                chalk.hex(comm.hexColors.grey)(`${dataArr[1] || ""}`)
+            )
+        } else {
+            console.log(chalk.keyword("blue")(`${dataArr[0]}`))
+        }
+        // console.log(`Output: ${data}`);
+    });
+    deployProcess.stderr.on('data', (data) => {
+        comm.showMessageRandom(data, "red")
+        // console.error(`Error: ${data}`);
+    });
+
+    deployProcess.on('close', (code) => {
+        // comm.showMessageRandom(data, "green")
+        // console.log(`Process exited with code ${code}`);
+    });
+
+    // Optional: If you want to send input data to the process
+    // deployProcess.stdin.write('your input data here\n'); // Replace with actual data
+    deployProcess.stdin.end(); // End the input stream
+}
+
+function deleteIndexJS() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const currConnDirectory = await comm.getCurrentPWD()
+            if (await checkIfFileExist2(`${currConnDirectory}/index.js`, "index.js", "boolean")) {
+                fs.unlinkSync(`${currConnDirectory}/index.js`)
+                comm.showMessageRandom("\nindex.js file deleted successfully.\n", "grey")
+                return resolve("done")
+            } else { return resolve("done") }
+        } catch (error) {
+            console.log("🚀 ~ returnnewPromise ~ error:", error)
+            return reject(error)
+            // comm.showMessageHex(`${error} \n`, "#e88388")
+        }
+    })
+}
 async function deploy() {
     try {
 
@@ -46,49 +100,36 @@ async function deploy() {
             ))
 
         await AppID.replaceAppId(targetEnv)
-        if (await comm.confirmOptions(`Do you want to initate the sudowmio deploy?`)) {
+        console.log(
+            chalk.keyword("white")(`\n Enviroment Selected for Deployment: `),
+            chalk.keyword("orange")(`${targetEnv}`
+            ))
+        if (await comm.confirmOptions(`Do you want to initate the sudowmio deploy on ${targetEnv}?`)) {
+            // if (await comm.confirmOptions(`Do you want to initate the sudowmio deploy?`)) {
+            if (targetEnv.includes("PROD")) {
+                inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'confirmation',
+                        message: 'Type "deploy" to confirm:',
+                        validate: (input) => {
+                            if (input.toLowerCase() === 'deploy') {
+                                return true;
+                            }
+                            return 'You must type "deploy" to proceed.';
+                        },
+                    },
+                ]).then(async (answers) => {
+                    await deleteIndexJS()
+                    intiateDeployment()
+                });
 
-            const currConnDirectory = await comm.getCurrentPWD()
-            if (await checkIfFileExist2(`${currConnDirectory}/index.js`, "index.js", "boolean")) {
-                fs.unlinkSync(`${currConnDirectory}/index.js`)
-                comm.showMessageRandom("\nindex.js file deleted successfully.\n", "grey")
+            } else {
+                await deleteIndexJS()
+                intiateDeployment()
             }
 
-            const command = 'sudowmio';
-            const args = ["deploy"];
-
-
-            // Spawn the child process
-            const deployProcess = spawn(command, args);
-            deployProcess.stdout.on('data', (data) => {
-                let dataArr = String(data).split("[INFO]")
-                if (dataArr.length > 1) {
-                    console.log(
-                        chalk.keyword("orange")(`${dataArr[0]}`),
-                        chalk.keyword("white")(`[`),
-                        chalk.keyword("green")(`INFO`),
-                        chalk.keyword("white")(`]`),
-                        chalk.hex(comm.hexColors.grey)(`${dataArr[1] || ""}`)
-                    )
-                } else {
-                    console.log(chalk.keyword("blue")(`${dataArr[0]}`))
-                }
-                // console.log(`Output: ${data}`);
-            });
-            deployProcess.stderr.on('data', (data) => {
-                comm.showMessageRandom(data, "red")
-                // console.error(`Error: ${data}`);
-            });
-
-            deployProcess.on('close', (code) => {
-                // comm.showMessageRandom(data, "green")
-                // console.log(`Process exited with code ${code}`);
-            });
-
-            // Optional: If you want to send input data to the process
-            // deployProcess.stdin.write('your input data here\n'); // Replace with actual data
-            deployProcess.stdin.end(); // End the input stream
-
+            // }
 
         } else {
             comm.showMessageHex(`${"❌ Deployment Terminated"}`, "#e88388")

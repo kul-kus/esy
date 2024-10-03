@@ -285,7 +285,7 @@ function getAllFilesModified(data) {
     }
     if (commitModified.length) {
         commitModified.forEach(curr => {
-            console.log("getAllFilesModified -> curr", curr)
+            // console.log("getAllFilesModified -> curr", curr)
             curr = curr.replace("M ", "")
             commitFilesList.push({
                 name: chalk.keyword("lightgreen")(" Modified: ") + curr,

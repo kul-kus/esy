@@ -21,7 +21,7 @@ function reorderKeys(obj, newOrder) {
 function formObject(targetEnvConnDetails) {
     let Obj = {}
     targetEnvConnDetails.forEach(element => {
-        let key = `${element && element["title"] || ""} appID:${element && element["uid"] || ""} guid:${element && element["uid"] || ""} t:${element && element["triggers"] && element["triggers"].length || 0} a:${element && element["actions"] && element["actions"].length || 0}`
+        let key = `${element && element["title"] || ""} appID:${element && element["uid"] || ""} guid:${element && element["guid"] || ""} t:${element && element["triggers"] && element["triggers"].length || 0} a:${element && element["actions"] && element["actions"].length || 0}`
         Obj[key] = element
     })
     return Obj

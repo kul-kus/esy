@@ -166,25 +166,25 @@ function commitChanges(pwd, commitMess, currentBranch) {
 }
 
 function pushChanges(pwd, currentBranch) {
-    console.log("---------------push aaaya ------")
+    // console.log("---------------push aaaya ------")
     return new Promise((res, rej) => {
         gitComm.startSpinner(oraspinner, "Pushing changes to Git Repository", "none")
         var pushChanges = exec(`cd ${pwd} & git push origin ${currentBranch}`, {
             shell: true
         });
-        console.log("push invoked--")
+        // console.log("push invoked--")
         pushChanges.stdout.on('error', function (error) {
-            console.log("TCL :- ~ file: push.js ~ line 179 ~ error", error);
+            // console.log("TCL :- ~ file: push.js ~ line 179 ~ error", error);
             return rej(gitComm.stopSpinnerAndShowMessage(oraspinner, "fail", `Push error ${error}`, comm.hexColors.red))
         })
         pushChanges.stdout.on('data', function (data) {
-        console.log("pushChanges -------> data", data)
+        // console.log("pushChanges -------> data", data)
             data = gitComm.formatData(data)
             console.log("  Push Data: ", data)
         })
 
         pushChanges.stdout.on('close', function (data) {
-            console.log("TCL :- ~ file: push.js ~ line 188 ~ data", data);
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data", data);
             data = gitComm.formatData(data)
             console.log("")
             let mess = "Push Completed Successfully :)"
@@ -192,13 +192,13 @@ function pushChanges(pwd, currentBranch) {
         })
         //---------------------------------------
         pushChanges.stderr.on('close', function (data) {
-            console.log("TCL :- ~ file: push.js ~ line 188 ~ data close 1", data);
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data close 1", data);
         })
         pushChanges.stderr.on("end", function (data) {
-            console.log("TCL :- ~ file: push.js ~ line 188 ~ data end 1", data);
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data end 1", data);
         })
         pushChanges.stdout.on('end', function (data) {
-            console.log("TCL :- ~ file: push.js ~ line 188 ~ data end 2", data);
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data end 2", data);
         })
     })
 }

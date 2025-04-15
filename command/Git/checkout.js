@@ -17,7 +17,7 @@ var pwd = ""
 module.exports = {
     checkout: async function (filterParam) {
         try {
-            console.log("-----filterParam-----",filterParam)
+            // console.log("-----filterParam-----",filterParam)
             // await CurdOp.store()
             pwd = await gitComm.getCurrentPWD()
             var { allBranchName, currBranch } = await gitComm.getBranchDeatils(filterParam, pwd, oraspinner)
@@ -35,7 +35,7 @@ module.exports = {
             } else {
                 console.log(chalk.keyword("white")("\n  Current Branch: ") + chalk.keyword("orange")(currentBranch) + "\n")
 
-                let newBranch = await comm.showOptions(allBranchName, "Select the Branch to checkout.")
+                let newBranch = await comm.showOptionsSearch(allBranchName, "Select the Branch to checkout.")
                 newBranch = stripAnsi(newBranch).trim()
                 newBranch = splitFromOrigin(newBranch)
 

@@ -56,7 +56,12 @@ function getAppData(filePath) {
             const jsonData = JSON.parse(data);
             const appId = jsonData["appId"] || null; // Return null if appId is not found
             const guid = jsonData["guid"] || null; // Return null if appId is not found
-            return resolve({ appId, guid })
+            const triggers = jsonData["triggers"] || null; // Return null if appId is not found
+            const actions = jsonData["actions"] || null; // Return null if appId is not found
+            const title = jsonData["title"] || jsonData["name"] || null; // Return null if appId is not found
+
+
+            return resolve({ appId, guid, triggers, actions, title })
         } catch (parseError) {
             // return reject("invalid")
             return reject(`Invalid path to Connector Folder.\n Unable to read index.json on path ${filePath}`)

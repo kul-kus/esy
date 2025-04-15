@@ -18,8 +18,8 @@ module.exports = {
                     wmioFileName.unshift("Sag")
                     // console.log("wmioFileName", wmioFileName)
                     if (wmioFileName.length) {
-                        let selectedOpt = await comm.showOptions(wmioFileName, "Select Repository to open.")
-                        console.log("selectedOpt", selectedOpt)
+                        let selectedOpt = await comm.showOptionsSearch(wmioFileName, "Select Repository to open.")
+                        // console.log("selectedOpt", selectedOpt)
                         comm.openFileInNanoEditor(selectedOpt, [null, "--code"], "git")
                     } else {
                         comm.showMessageOrange("No records found..")

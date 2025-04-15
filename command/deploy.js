@@ -1,7 +1,7 @@
 
 var commAppID = require("./AppId/common")
 var comm = require("./common")
-var AppID = require("./AppId/appid")
+var AppID = require("./AppId/replaceAppid")
 var basefile = "config.json"
 const { spawn } = require('child_process');
 let chalk = require("chalk")
@@ -37,12 +37,12 @@ async function intiateDeployment() {
             console.log(
                 chalk.keyword("orange")(`${dataArr[0]}`),
                 chalk.keyword("white")(`[`),
-                chalk.keyword("green")(`INFO`),
+                chalk.hex(comm.hexColors.green)(`INFO`),
                 chalk.keyword("white")(`]`),
                 chalk.hex(comm.hexColors.grey)(`${dataArr[1] || ""}`)
             )
         } else {
-            console.log(chalk.keyword("blue")(`${dataArr[0]}`))
+            console.log(chalk.hex(comm.hexColors.magenta)(`${dataArr[0]}`))
         }
         // console.log(`Output: ${data}`);
     });
@@ -82,7 +82,7 @@ async function deploy() {
 
         let connDetails = await commAppID.getConnectorData()
         let targetEnv = await comm.showOptionsSearch(connDetails["env"], "Select the Target Enviroment on which the connector is to deployed.")
-
+        // let targetEnv = "AZ_PROD_US"
         await checkIfFileExist2(`${comm.wmioPath}/${targetEnv}.json`, `${targetEnv}.json`, "string")
         await comm.copyFileFS(`${comm.wmioPath}/${targetEnv}.json`, `${comm.wmioPath}/${basefile}`)
         let cofigData = await comm.readFileFS(basefile)
@@ -96,7 +96,7 @@ async function deploy() {
         comm.showMessageRandom(`Host: ${cofigData["host"]}`, "grey")
         console.log(
             chalk.hex(comm.hexColors.green)(`\n Connector Config Successfully changed to`),
-            chalk.keyword("green")(`${targetEnv}`
+            chalk.keyword("orange")(`${targetEnv}`
             ))
 
         await AppID.replaceAppId(targetEnv)
@@ -106,7 +106,7 @@ async function deploy() {
             ))
         if (await comm.confirmOptions(`Do you want to initate the sudowmio deploy on ${targetEnv}?`)) {
             // if (await comm.confirmOptions(`Do you want to initate the sudowmio deploy?`)) {
-            if (targetEnv.includes("PROD")) {
+            if (targetEnv.includes("_PROD")) {
                 inquirer.prompt([
                     {
                         type: 'input',
@@ -135,8 +135,6 @@ async function deploy() {
             comm.showMessageHex(`${"❌ Deployment Terminated"}`, "#e88388")
         }
     } catch (error) {
-        // process.exit
-
         comm.showMessageHex(`${error} \n`, "#e88388")
     }
 }

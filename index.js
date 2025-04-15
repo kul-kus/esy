@@ -8,7 +8,6 @@ var killProcess = require("./command/kill_process")
 var create = require("./command/create")
 
 
-
 var commandFun = require("./command/CURD_command")
 var help = require("./command/help")
 
@@ -20,7 +19,8 @@ let command = parameters.splice(0, 1)
 if (command && Array.isArray(command) && command.length) {
   command = command[0].toLocaleLowerCase()
 }
-
+// console.log("----",command)
+// console.log("--parameters--",parameters)
 if (parameters && parameters.length && command != "schema") {
   let tempParam = []
   parameters.forEach(element => {
@@ -65,14 +65,35 @@ else if (command == "schema") {
   }
 }
 else if (command == "appid" || command == "app") {
-  return require("./command/AppId/appid").replaceAppId()
+  // return require("./command/AppId/replaceAppid").replaceAppId()
+  if (parameters == "replace") {
+    return require("./command/AppId/replaceAppid").replaceAppId()
+  }
+  else if (parameters == "search") {
+    return require("./command/search").searchConnector()
+  }
+  else if (parameters == "metadata") {
+    return require("./command/metadata").metadata()
+  }
+  else if (parameters == "getappid" || parameters == "get") {
+    return require("./command/AppId/getAllAppID").getAllAppID()
+  }
+  else {
+    console.log("Pass Additional parameter like replace, search, metadata, get")
+  }
 }
+// else if (command == "getappid" || command == "getapp") {
+//   return require("./command/AppId/getAllAppID").getAllAppID()
+// }
 else if (command == "deploy") {
   return require("./command/deploy").deploy()
 }
-else if (command == "search") {
-  return require("./command/search").searchConnector()
-}
+// else if (command == "metadata") {
+//   return require("./command/metadata").metadata()
+// }
+// else if (command == "searchapp") {
+//   return require("./command/search").searchConnector()
+// }
 // else if (command == "migrate") {
 //   return migrate.migrate()
 // } 

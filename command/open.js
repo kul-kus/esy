@@ -14,11 +14,12 @@ module.exports = {
                 if (filterParam == "--all") {
                     comm.openFileInNanoEditor("", [null, "--code"], "git")
                 } else {
-                    let wmioFileName = await comm.getFileList(filterParam, true, "git")
+                    let wmioFileName = await comm.getFileListFs(filterParam, true, "git")
+                    wmioFileName.unshift("Sag")
                     // console.log("wmioFileName", wmioFileName)
                     if (wmioFileName.length) {
-                        let selectedOpt = await comm.showOptions(wmioFileName, "Select Repository to open.")
-                        console.log("selectedOpt", selectedOpt)
+                        let selectedOpt = await comm.showOptionsSearch(wmioFileName, "Select Repository to open.")
+                        // console.log("selectedOpt", selectedOpt)
                         comm.openFileInNanoEditor(selectedOpt, [null, "--code"], "git")
                     } else {
                         comm.showMessageOrange("No records found..")

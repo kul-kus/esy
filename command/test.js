@@ -1,8 +1,6 @@
 
 var comm = require("./common")
 var spawn = require('child_process').spawn;
-var {exec} = require('child_process');
-
 let chalk = require("chalk")
 const stripAnsi = require('strip-ansi');
 const cliSpinners = require('cli-spinners').dots
@@ -13,7 +11,7 @@ var currentBranch = ""
 var pwd = ""
 
 module.exports = {
-    checkout: async function (filterParam) {
+    checkout2: async function (filterParam) {
         try {
             pwd = await comm.getCurrentPWD()
             let allBranchName = await getAllBranch(filterParam)
@@ -26,17 +24,18 @@ module.exports = {
             }
             if (allBranchName.length == 0) {
                 console.log(chalk.keyword("red")("No branch found matching your search results :("))
-                console.log(chalk.keyword("orange")("Try 'alexa checkout --all'"))
+                console.log(chalk.keyword("orange")("Try 'esy checkout --all'"))
             } else {
                 console.log(chalk.keyword("white")("  Current Branch: ") + chalk.keyword("orange")(currentBranch))
 
-                let newBranch = await comm.showOptionsSearch(allBranchName, "Select the Branch to checkout.")
+                let newBranch = await comm.showOptions(allBranchName, "Select the Branch to checkout.")
                 newBranch = stripAnsi(newBranch).trim()
                 newBranch = splitFromOrigin(newBranch)
 
                 await checkout(pwd, newBranch)
                 await pullChanges(pwd, newBranch)
             }
+
         } catch (error) {
             // console.log(chalk.keyword("red")(error))
         }
@@ -56,7 +55,7 @@ function splitFromOrigin(str) {
 function checkout(pwd, newBranch) {
     return new Promise((res, rej) => {
         comm.startSpinner(oraspinner, "Switching to New Branch", "none")
-        var checkoutBranch = exec(`cd ${pwd} & git checkout ${newBranch}`, {
+        var checkoutBranch = spawn(`cd ${pwd} "$@" && git checkout ${newBranch}`, {
             shell: true
         });
         checkoutBranch.stdout.on('data', async function (data) {
@@ -94,7 +93,7 @@ function getAllBranch(filterParam) {
         }
         let gitBool = true
         comm.startSpinner(oraspinner, "Fetching Branch Dtails", "none")
-        let getBranch = exec(`cd ${pwd} & ${branchCommand}`, {
+        let getBranch = spawn(`cd ${pwd} "$@" && ${branchCommand}`, {
             shell: true
         });
 
@@ -129,9 +128,9 @@ function getAllBranch(filterParam) {
 
 function pullChanges(pwd, currentBranch) {
     return new Promise((res, rej) => {
-        comm.startSpinner(oraspinner, "Fetching Latest pull3", "none")
+        comm.startSpinner(oraspinner, "Fetching Latest pull1", "none")
         let pullGitBool = true
-        var pullChanges = exec(`cd ${pwd} & git pull origin ${currentBranch}`, {
+        var pullChanges = spawn(`cd ${pwd} "$@" && git pull origin ${currentBranch}`, {
             shell: true
         });
 

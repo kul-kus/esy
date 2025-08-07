@@ -1,12 +1,14 @@
 var inquirer = require('inquirer');
 var spawn = require('child_process').spawn;
+var {exec} = require('child_process');
+
 var comm = require("./common.js")
 let chalk = require("chalk")
 const stripAnsi = require('strip-ansi');
 module.exports = {
     migrate: function (command) {
         try {
-            var cmdToGetFile = spawn('cd "$@" && ls wmio/.connector', {
+            var cmdToGetFile = exec('cd & ls wmio/.connector', {
                 shell: true
             });
             let wmioFileName = []
@@ -39,7 +41,7 @@ module.exports = {
                     selectedTenant = stripAnsi(selectedTenant).trim()
                     let tenantLabel = selectedTenant.split(" : ")[0]
                     if (readData[tenantLabel]) {
-                        var cmdToExecMigrate = spawn(readData[tenantLabel], {
+                        var cmdToExecMigrate = exec(readData[tenantLabel], {
                             shell: true
                         });
                         cmdToExecMigrate.stdout.on('data', function (data) {
@@ -68,7 +70,7 @@ module.exports = {
     },
     read_file(fileName) {
         return new Promise((res, rej) => {
-            let readCommand = spawn(`cd "$@" && cat wmio/.connector/${fileName}`, {
+            let readCommand = exec(`cd & cat wmio/.connector/${fileName}`, {
                 shell: true
             })
             readCommand.stdout.on('data', function (data) {

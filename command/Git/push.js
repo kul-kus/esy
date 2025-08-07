@@ -3,6 +3,8 @@
 var comm = require("./../common")
 var gitComm = require("./gitCommon")
 var spawn = require('child_process').spawn;
+var {exec} = require('child_process');
+
 let chalk = require("chalk")
 let CurdOp = require("./../CURD_command")
 var inquirer = require('inquirer');
@@ -22,6 +24,7 @@ var copyBool = true
 
 module.exports = {
     push: async function (filterParam) {
+        // console.log("TCL :- ~ file: push.js ~ line 27 ~ filterParam", filterParam);
         try {
             // await CurdOp.store()
 
@@ -66,7 +69,7 @@ module.exports = {
                     if (await comm.confirmOptions(`Do you want to push the above Mentioned Changes`)) {
                         await addChanges(pwd, addStingMess)
                         await commitChanges(pwd, filterParam[0], currentBranch)
-                        await gitComm.pullChanges(pwd, currentBranch, oraspinner)
+                        // await gitComm.pullChanges(pwd, currentBranch, oraspinner)
                         await pushChanges(pwd, currentBranch, filterParam[0])
                         await GetCommlitLogs(pwd, filterParam[0], currentBranch)
                     } else {
@@ -89,7 +92,7 @@ module.exports = {
 
 function gitStatus(pwd, command, spinnerTxt) {
     return new Promise((res, rej) => {
-        var getStatus = spawn(`cd ${pwd} "$@" && ${command}`, {
+        var getStatus = exec(`cd ${pwd} & ${command}`, {
             shell: true
         });
         gitComm.startSpinner(oraspinner, spinnerTxt, "none")
@@ -105,11 +108,11 @@ function gitStatus(pwd, command, spinnerTxt) {
 
 
 function addChanges(pwd, addStingMess) {
-    console.log("addChanges -> addStingMess", addStingMess)
+    // console.log("addChanges -> addStingMess", addStingMess)
     return new Promise((res, rej) => {
         console.log(chalk.keyword("magenta")("  Command Initiated: "), addStingMess)
         gitComm.startSpinner(oraspinner, "Adding changes to Git Repository", "none")
-        var addChanges = spawn(`cd ${pwd} "$@" && ${addStingMess}`, {
+        var addChanges = exec(`cd ${pwd} & ${addStingMess}`, {
             shell: true
         });
 
@@ -132,7 +135,7 @@ function addChanges(pwd, addStingMess) {
 
 function commitChanges(pwd, commitMess, currentBranch) {
     return new Promise((res, rej) => {
-        var commitChanges = spawn(`cd ${pwd} "$@" && git commit -m "${commitMess}"`, {
+        var commitChanges = exec(`cd ${pwd} & git commit -m "${commitMess}"`, {
             shell: true
         });
         gitComm.startSpinner(oraspinner, "Commiting changes to Git Repository", "none")
@@ -163,26 +166,39 @@ function commitChanges(pwd, commitMess, currentBranch) {
 }
 
 function pushChanges(pwd, currentBranch) {
+    // console.log("---------------push aaaya ------")
     return new Promise((res, rej) => {
         gitComm.startSpinner(oraspinner, "Pushing changes to Git Repository", "none")
-        var pushChanges = spawn(`cd ${pwd} "$@" && git push origin ${currentBranch}`, {
+        var pushChanges = exec(`cd ${pwd} & git push origin ${currentBranch}`, {
             shell: true
         });
-
+        // console.log("push invoked--")
         pushChanges.stdout.on('error', function (error) {
+            // console.log("TCL :- ~ file: push.js ~ line 179 ~ error", error);
             return rej(gitComm.stopSpinnerAndShowMessage(oraspinner, "fail", `Push error ${error}`, comm.hexColors.red))
         })
         pushChanges.stdout.on('data', function (data) {
+        // console.log("pushChanges -------> data", data)
             data = gitComm.formatData(data)
             console.log("  Push Data: ", data)
         })
 
-
         pushChanges.stdout.on('close', function (data) {
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data", data);
             data = gitComm.formatData(data)
             console.log("")
             let mess = "Push Completed Successfully :)"
             return res(comm.stopSpinnerAndShowMessage(oraspinner, "succeed", mess, comm.hexColors.cyan))
+        })
+        //---------------------------------------
+        pushChanges.stderr.on('close', function (data) {
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data close 1", data);
+        })
+        pushChanges.stderr.on("end", function (data) {
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data end 1", data);
+        })
+        pushChanges.stdout.on('end', function (data) {
+            // console.log("TCL :- ~ file: push.js ~ line 188 ~ data end 2", data);
         })
     })
 }
@@ -191,7 +207,7 @@ function GetCommlitLogs(pwd, commitMessage, currentBranch) {
     return new Promise((res, rej) => {
         gitComm.startSpinner(oraspinner, "Fetching Commit Logs", "none")
 
-        var commitLog = spawn(`cd ${pwd} "$@" && git log -1`, {
+        var commitLog = exec(`cd ${pwd} & git log -1`, {
             shell: true
         });
         commitLog.stdout.on('error', function (error) {
@@ -234,7 +250,7 @@ function GetCommlitLogs(pwd, commitMessage, currentBranch) {
 
                 let strCopy = `Commit ID: ${commitObj["commit"]}\nBranch: ${commitObj['branch']}\nMessage: ${commitObj['message']}\nDate ${commitObj['date']}\nAuthor ${commitObj['author']}`
                 if (copyBool) {
-                    comm.copyStringToClipBoard(strCopy)
+                    // comm.copyStringToClipBoard(strCopy)
                     comm.stopSpinnerAndShowMessage(oraspinner, "succeed", "Commit Data copied Successfully\n", "lightgreen")
 
                 }
@@ -269,7 +285,7 @@ function getAllFilesModified(data) {
     }
     if (commitModified.length) {
         commitModified.forEach(curr => {
-            console.log("getAllFilesModified -> curr", curr)
+            // console.log("getAllFilesModified -> curr", curr)
             curr = curr.replace("M ", "")
             commitFilesList.push({
                 name: chalk.keyword("lightgreen")(" Modified: ") + curr,

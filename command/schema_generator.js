@@ -14,11 +14,11 @@ try {
             "type": "object",
             "properties": buildSchema(data)
         })
-        clipboardy.writeSync(JSON.stringify({
-            "title": "output",
-            "type": "object",
-            "properties": buildSchema(data)
-        }, null, 2));
+        // clipboardy.writeSync(JSON.stringify({
+        //     "title": "output",
+        //     "type": "object",
+        //     "properties": buildSchema(data)
+        // }, null, 2));
         comm.showMessageOrange(opschema)
 
     }

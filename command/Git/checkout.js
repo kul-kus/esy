@@ -2,6 +2,8 @@
 var comm = require("./../common")
 var gitComm = require("./gitCommon")
 var spawn = require('child_process').spawn;
+var {exec} = require('child_process');
+
 let chalk = require("chalk")
 let CurdOp = require("./../CURD_command")
 const stripAnsi = require('strip-ansi');
@@ -15,6 +17,7 @@ var pwd = ""
 module.exports = {
     checkout: async function (filterParam) {
         try {
+            // console.log("-----filterParam-----",filterParam)
             // await CurdOp.store()
             pwd = await gitComm.getCurrentPWD()
             var { allBranchName, currBranch } = await gitComm.getBranchDeatils(filterParam, pwd, oraspinner)
@@ -23,7 +26,7 @@ module.exports = {
                 allBranchName = allBranchName.filter(curr => {
                     curr = stripAnsi(curr)
                     curr = splitFromOrigin(curr)
-                    return curr.startsWith(filterParam[0])
+                    return curr.includes(filterParam[0])
                 })
             }
             if (allBranchName.length == 0) {
@@ -32,7 +35,7 @@ module.exports = {
             } else {
                 console.log(chalk.keyword("white")("\n  Current Branch: ") + chalk.keyword("orange")(currentBranch) + "\n")
 
-                let newBranch = await comm.showOptions(allBranchName, "Select the Branch to checkout.")
+                let newBranch = await comm.showOptionsSearch(allBranchName, "Select the Branch to checkout.")
                 newBranch = stripAnsi(newBranch).trim()
                 newBranch = splitFromOrigin(newBranch)
 
@@ -58,7 +61,7 @@ function splitFromOrigin(str) {
 function checkout(pwd, newBranch) {
     return new Promise((res, rej) => {
         comm.startSpinner(oraspinner, "Switching to New Branch", "none")
-        var checkoutBranch = spawn(`cd ${pwd} "$@" && git checkout ${newBranch}`, {
+        var checkoutBranch = exec(`cd ${pwd} & git checkout ${newBranch}`, {
             shell: true
         });
         checkoutBranch.stdout.on('data', async function (data) {
@@ -69,7 +72,7 @@ function checkout(pwd, newBranch) {
             // console.log(chalk.keyword("lightblue").bold("Switched to new Branch- ") + chalk.keyword("yellow")(newBranch))
             let msg = chalk.keyword("lightblue").bold("Switched to new Branch- ") + chalk.keyword("yellow")(newBranch)
             comm.stopSpinnerAndShowMessage(oraspinner, "succeed", msg, "none")
-            comm.copyStringToClipBoard(`git pull origin ${newBranch.trim()}`)
+            // comm.copyStringToClipBoard(`git pull origin ${newBranch.trim()}`)
             return res("Checkout Complete")
         })
         checkoutBranch.stdout.on("error", async function (data) {

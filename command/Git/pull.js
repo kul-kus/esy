@@ -2,6 +2,7 @@
 
 var gitComm = require("./gitCommon")
 var spawn = require('child_process').spawn;
+var {exec} = require('child_process');
 let chalk = require("chalk")
 let CurdOp = require("./../CURD_command")
 const cliSpinners = require('cli-spinners').dots
@@ -41,7 +42,7 @@ function getAllBranch(filterParam) {
     let gitBool = true
     return new Promise((res, rej) => {
         comm.startSpinner(oraspinner, "Fetching Branch Details", "none")
-            let getBranch = spawn(`cd ${pwd} "$@" && ${branchCommand}`, {
+            let getBranch = exec(`cd ${pwd} & ${branchCommand}`, {
                 shell: true
             });
 
@@ -78,9 +79,9 @@ function getAllBranch(filterParam) {
 
 function pullChanges(pwd, currentBranch) {
     return new Promise((res, rej) => {
-        comm.startSpinner(oraspinner, "Fetching Latest pull", "none")
+        comm.startSpinner(oraspinner, "Fetching Latest pull--", "none")
         let gitBool = true
-        var pullChanges = spawn(`cd ${pwd} "$@" && git pull origin ${currentBranch}`, {
+        var pullChanges = exec(`cd ${pwd} & git pull origin ${currentBranch}`, {
             shell: true
         });
 

@@ -1,26 +1,14 @@
 {
-  "name": "@kul-kus/esy",
-  "version": "1.0.6",
-  "description": "esy is a Command Line Interface tool that simplifies basic git operations. Also, it simplifies account switching in webMethods.io Integration connectors along with performing various CRUD operations in accounts.",
+  "name": "alexa-bot",
+  "version": "1.0.0",
+  "description": "Makes you git push easier.",
   "bin": {
-    "esy": "./index.js"
+    "alexa": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "kill",
-    "schema",
-    "git",
-    "esy",
-    "wmio",
-    "cli"
-  ],
-  "homepage": "https://github.com/kul-kus/esy#readme",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kul-kus/esy"
-  },
+  "keywords": [],
   "author": "Kuldeep Kushwaha",
   "license": "ISC",
   "dependencies": {
@@ -29,12 +17,14 @@
     "cli-table3": "^0.6.0",
     "clipboardy": "^2.3.0",
     "colors": "^1.4.0",
-    "inquire": "^0.4.8",
+    "fuzzy": "^0.1.3",
+    "glob": "^11.0.0",
+    "inquirer": "^6.2.2",
+    "inquirer-autocomplete-prompt": "^1.0.1",
+    "lodash": "^4.17.21",
     "ora": "^5.1.0",
+    "rxjs": "^6.4.0",
     "strip-ansi": "^6.0.0",
     "typy": "^3.3.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

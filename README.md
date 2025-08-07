@@ -1,7 +1,7 @@
 ## Installation
 In order to get started with ‘esy’, you will first need to install it on your system. To do so, run the following command:
 ``` bash
-npm i @kul-kus/esy -g
+npm i @kul/esy -g
 ```
 
 >NOTE: For Ubuntu OS, make sure to run the 'esy store' command before using any git commands.
@@ -41,23 +41,18 @@ Pushes changes to your git repository. It provides you with an interactive CLI u
 ``` bash
   esy push <commit_message>
 ```
-![Push](https://github.com/kul-kus/esy/blob/master/Images/push.png?raw=true)
-
+[]
 ## pull
 Pulls changes from git repository.
 ``` bash
   esy pull
 ```
-![Pull](https://github.com/kul-kus/esy/blob/master/Images/pull.png?raw=true)
-
 
 ## checkout
 Checks out to a specific branch and pulls latest changes from the selected branch. It provides a list of branches you can checkout to.
 ``` bash
   esy checkout 
 ```
-![Checkout](https://github.com/kul-kus/esy/blob/master/Images/checkout.png?raw=true)
-
 
 ## branch
 Use this command to know your current branch.
@@ -116,30 +111,21 @@ Use this to kill any running process.
 ``` bash
   esy kill <port_number>
 ```
-![Checkout](https://github.com/kul-kus/esy/blob/master/Images/kill.png?raw=true)
-
-
 
 ## schema
 Use this schema for specified object.
 ``` bash
-  esy schema <input_object>
+  esy kill <input_object>
 ```
 
 ## help
 Use this command to list all the commands you can use.
 ``` bash
-  esy help
+  wmio help
 ```
 
 ## version
 Use this command to list current version of your esy npm.
 ``` bash
-  esy version
+  wmio version
 ```
-
-<!-- ## Homepage
-[github.com/kul-kus/esy#readme](https://github.com/kul-kus/esy#readme)
-
-## Repository
-[github.com/kul-kus/esy](https://github.com/kul-kus/esy) -->

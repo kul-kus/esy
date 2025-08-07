@@ -63,7 +63,8 @@ module.exports = {
                         show_msg = selProcess
                         show_msg = show_msg.split(" ").join(`\n○ `)
                         show_msg = chalk.keyword("grey")(show_msg)
-                        await killProcess(selProcess)
+                        let data = await killProcess(selProcess)
+                        console.log("data===>", data)
                         comm.stopSpinnerAndShowMessage(oraspinner, "succeed", "Following process have been killed successfully." + show_msg, comm.hexColors.green)
                         return resolve("Succeed")
                     }
@@ -72,6 +73,7 @@ module.exports = {
                     return reject("Failed")
                 }
             } catch (error) {
+                console.log("error", error)
                 return comm.showError(error)
                 // return reject(error)
 
@@ -122,16 +124,31 @@ function ListProcess(listProcessCmd, oraspinner) {
 }
 
 function killProcess(pname) {
+    console.log("killProcess -> pnamer", `killall${pname}`)
     return new Promise((res, rej) => {
-        var cmdToListProcess = spawn(`killall ${pname}`, {
+        var cmdToListProcess = spawn(`killall -s KILL${pname}`, {
             shell: true
         })
         cmdToListProcess.stdout.on('data', function (data) {
+            return res("done")
         })
         cmdToListProcess.stdout.on("close", () => {
             return res("done")
         })
+        cmdToListProcess.stdout.on("end", () => {
+            return res("done")
+        })
+        cmdToListProcess.stdout.on("pause", () => {
+            return res("done")
+        })
+        cmdToListProcess.stdout.on("readable", () => {
+            return res("done")
+        })
+        cmdToListProcess.stdout.on("resume", () => {
+            return res("done")
+        })
         cmdToListProcess.stdout.on("error", (err) => {
+            console.log("killProcess -> err", err)
             return rej(err)
         })
     })

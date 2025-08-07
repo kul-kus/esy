@@ -1,8 +1,14 @@
 let chalk = require("chalk")
-var inquirer = require('inquirer');
+const fuzzy = require('fuzzy');
+const inquirer = require('inquirer');
 var spawn = require('child_process').spawn;
 var config = require("./../config")
 const clipboardy = require('clipboardy');
+const fs = require('fs');
+const { exec } = require("child_process");
+const _ = require('lodash');
+inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
+
 
 module.exports = {
     "homePath": config.homePath,
@@ -10,6 +16,10 @@ module.exports = {
     "gitPath": config.gitPath,
     "alexa_code": config.alexa_code,
     "basepath": config.basepath,
+    "kubenavPath": config.kubenavPath,
+    "jmeterPath": config.jmeterPath,
+
+
     hexColors: {
         red: "#e88388",
         yellow: "#dbab78",
@@ -20,6 +30,21 @@ module.exports = {
         grey: "#b9c0cb"
     },
 
+    cleanedArray: function (inputArray) {
+        return inputArray
+            .filter(item => item !== null && item !== undefined && item.trim() !== '')
+        // .map(item => item.replace(/^[-]+/, '').trim());
+    },
+    searchObject: function (arr, key, value) {
+        return arr.filter(obj => obj[key] == value);
+    },
+
+    ensureJsonExtension: function (filename) {
+        if (!filename.includes('.') || !/\.[^\/\\]+$/.test(filename)) {
+            return `${filename}.json`;
+        }
+        return filename;
+    },
     startSpinner: function (oraspinner, message, color) {
         if (!message) {
             message = ""
@@ -72,16 +97,7 @@ module.exports = {
     },
     getCurrentPWD: async function () {
         return new Promise((res, rej) => {
-            var cmdToGetPWD = spawn(`pwd`, {
-                shell: true
-            });
-            cmdToGetPWD.stdout.on("error", function (error) {
-                return rej(`Unbale to Fetch Current Working Directory Error-> ${error}`)
-            })
-            cmdToGetPWD.stdout.on('data', function (data) {
-                let pwd = self.addEscapeToSpace(data.toString().trim())
-                return res(pwd)
-            })
+            return res(process.cwd())
         })
     },
 
@@ -100,23 +116,46 @@ module.exports = {
     },
     getFileList: function (filterParam, excludeConfig, command) {
         return new Promise((res, rej) => {
-            var cmdToGetFile = spawn(`cd "$@" && ls ${(command && command == "git") ? (self.gitPath) : (self.wmioPath)}`, {
-                shell: true
-            });
-            cmdToGetFile.stdout.on('data', function (data) {
-                wmioFileName = data.toString().split("\n").filter(Boolean)
-                if (filterParam && filterParam.length && filterParam[0]) {
-                    wmioFileName = wmioFileName.filter(curr => curr.toLowerCase().startsWith(filterParam[0].toLowerCase()))
-                }
-                if (excludeConfig) {
-                    wmioFileName = wmioFileName.filter(e => e !== 'config.json' && e !== 'alias.json');
-                }
-                return res(wmioFileName)
-            })
-            cmdToGetFile.stdout.on("error", (err) => {
-                return rej(err)
-            })
+            let data = fs.readdirSync(self.wmioPath)
+            data = data.filter(Boolean)
+            wmioFileName = self.getWindowsFileConfig(data)
+            // console.log("🚀 ~ returnnewPromise ~ wmioFileName:", wmioFileName)
+            if (filterParam && filterParam.length && filterParam[0]) {
+                wmioFileName = wmioFileName.filter(curr => curr.toLowerCase().startsWith(filterParam[0].toLowerCase()))
+            }
+            if (excludeConfig) {
+                wmioFileName = wmioFileName.filter(e => e !== 'config.json' && e !== 'alias.json');
+            }
+            return res(wmioFileName)
         })
+    },
+
+    getFileListFs: function (filterParam, excludeConfig, command) {
+        return new Promise((res, rej) => {
+            let wmioFileName = fs.readdirSync((command && command == "git") ? (self.gitPath) : (self.wmioPath))
+            if (filterParam && filterParam.length && filterParam[0]) {
+                wmioFileName = wmioFileName.filter(curr => curr.toLowerCase().startsWith(filterParam[0].toLowerCase()))
+            }
+            if (excludeConfig) {
+                wmioFileName = wmioFileName.filter(e => e !== 'config.json' && e !== 'alias.json');
+            }
+            return res(wmioFileName)
+        })
+    },
+    getWindowsFileConfig: function (dataArr) {
+        let finalArr = []
+        if (dataArr && dataArr.length) {
+            dataArr.forEach(element => {
+                if (element.includes(".json") || element.includes(".txt")) {
+                    let data = element.split(" ")
+                    data = data[data.length - 1].replace("\r", "")
+                    // console.log("🚀 ~ file: common.js ~ line 140 ~ data--->",typeof data)
+                    finalArr.push(data)
+                }
+            });
+        }
+        // console.log("🚀 ~ file: common.js ~ line 146 ~ finalArr------->", Array.isArray(finalArr))
+        return finalArr
     },
     showError: function (msg) {
         console.log(chalk.keyword("red")("Error: " + msg))
@@ -135,6 +174,10 @@ module.exports = {
     showMessageRandom: function (msg, color) {
         console.log(chalk.keyword(color || 'orange')(msg))
     },
+    showMessageHex: function (msg, color) {
+        console.log(chalk.hex(color || "#a8cc8c")(msg))
+    },
+
     convertJson: function (str) {
         try {
             str = (str && typeof str === "string") ? JSON.parse(str) : str;
@@ -145,14 +188,41 @@ module.exports = {
     },
 
     checkJson: function (str) {
+        // console.log("TCL :- ~ file: common.js ~ line 184 ~==> str", str,typeof str);
         try {
+            // console.log("TCL :- ~ file: common.js ~ line 184 ~ str",JSON.parse(str));
             (str && typeof str === "string") ? JSON.parse(str) : str;
         } catch (e) {
+            // console.log("TCL :- ~ file: common.js ~ line 189 ~ e", e);
             return false;
         }
         return true;
     },
 
+    showOptionsSearch: function (choices, message) {
+        choices = _.compact(choices);
+        const question = [{
+            name: "alexa",
+            type: 'autocomplete',
+            message,
+            pageSize: 5,
+            source: function (answer, input) {
+                input = input || '';
+                return new Promise((resolve) => {
+                    setTimeout(function () {
+                        let result = fuzzy.filter(input, choices);
+                        resolve(
+                            result.map(el => el.original)
+                        );
+                    }, _.random(30, 200));
+                });
+            }
+        }];
+
+        return inquirer.prompt(question).then(data => {
+            return data.alexa
+        });
+    },
     showOptions: function (arr, msg) {
         return new Promise((res, rej) => {
             try {
@@ -180,10 +250,17 @@ module.exports = {
                 let opt = [{
                     name: "alexa",
                     type: 'confirm',
-                    message: (msg) ? (msg) : "Confirm"
+                    message: (msg) ? (msg) : "Confirm?",
+                    validate: (input) => {
+                        if (input.toLowerCase() === 'y' || input.toLowerCase() === 'Y') {
+                            return true;
+                        }
+                        return 'You must type "y" to proceed.';
+                    },
                 }];
-                inquirer.prompt(opt).then(data => {
-                    res(data.alexa)
+                inquirer.prompt(opt).then(answers => {
+                    return res(answers
+                        .alexa)
                 });
             } catch (error) {
                 rej(error)
@@ -225,6 +302,17 @@ module.exports = {
             }
         })
     },
+    readFileFS: function (fileName) {
+        return new Promise((res, rej) => {
+            try {
+                let path = `${self.wmioPath}/${fileName}`
+                let data = fs.readFileSync(path);
+                return res(data.toString())
+            } catch (error) {
+                return rej(error)
+            }
+        })
+    },
     createFile: function (fileName) {
         return new Promise((res, rej) => {
             try {
@@ -252,7 +340,7 @@ module.exports = {
     copyFile: function (source, dest) {
         return new Promise((res, rej) => {
             try {
-                let copyCommand = spawn(`cd "$@" && cp ${source} ${dest}`, {
+                let copyCommand = spawn(`cp ${source} ${dest}`, {
                     shell: true
                 })
                 copyCommand.stdout.on('data', function (data) {
@@ -262,8 +350,24 @@ module.exports = {
                     self.showError(err.toString());
                 })
                 copyCommand.stdout.on("end", async function (data) {
+                    // console.log("--end--",data.toString());
+
                     res("done")
                 })
+            } catch (error) {
+                return rej(error)
+            }
+        })
+    },
+    copyFileFS: function (source, dest) {
+        return new Promise((res, rej) => {
+            try {
+                fs.copyFile(source, dest, (err) => {
+                    if (err) {
+                        return rej("Something went wrong while copying.", err)
+                    }
+                    return res('File Copied Successfuly..');
+                });
             } catch (error) {
                 return rej(error)
             }
@@ -272,8 +376,6 @@ module.exports = {
     openFileInNanoEditor: async function (filename, param, command) {
         // console.log("param", param)
         try {
-
-
             let editior = "nano"
             if (param && Array.isArray(param) && param.length && param[1] == "--code") {
                 editior = "code"
@@ -281,7 +383,12 @@ module.exports = {
 
             let tempPath = `${self.homePath}/${filename}`
             if (command && command == "git") {
-                tempPath = `${self.gitPath}/${filename}`
+                if (filename == "Sag") {
+                    tempPath = `${self.gitPath}`
+                } else {
+                    tempPath = `${self.gitPath}/${filename}`
+                }
+
             }
             if (command && command == "config") {
                 tempPath = self.homePath
@@ -290,16 +397,12 @@ module.exports = {
                 // tempPath = await self.getCurrentPWD()
                 tempPath = self.alexa_code
             }
-
-            let updateCommand = spawn(editior, [tempPath], {
-                stdio: 'inherit',
-                detached: true
-            })
+            let updateCommand = exec(`${editior} ${tempPath}`)
             updateCommand.stdout.on("data", function (data) {
-                process.stdout.pipe(data);
+                // process.stdout.pipe(data);
             });
         } catch (error) {
-            // return self.showError(error)
+            return self.showError(error)
         }
     }
 }

@@ -53,27 +53,75 @@ module.exports = {
             return comm.showError(error)
         }
     },
-    store: async function () {
-        // return new Promise((res, rej) => {
-            try {
-                var cmdToGetPWD = spawn(`pwd`, {
+    debug: async function (param) {
+        // if (param && Array.isArray(param) && param.length) {
+        //     param = param[0]
+        // }
+        // else {
+        //     param = await comm.showOptions(["Enable", "Disable"], "Select the option for Debug Mode.")
+        // }
+        // param = param.toLowerCase()
+        // let status = "false"
+        // if (param == "on" || param == "true" || param == true || param == "enable") {
+        //     status = "true"
+        // }
+        try {
+            // export LOG_LEVEL="debug"
+
+
+            var cmdToGetPWD = spawn(`pwd`, {
+                shell: true
+            });
+            cmdToGetPWD.stdout.on('data', function (data) {
+                let pwd = comm.addEscapeToSpace(data.toString().trim())
+                console.log("pwd", pwd)
+                var cmdToExecDeployCommand = spawn(`cd ${pwd} "$@" && export LOG_LEVEL="debug"`, {
                     shell: true
                 });
 
-                cmdToGetPWD.stdout.on('data', function (data) {
-                    let pwd = comm.addEscapeToSpace(data.toString().trim())
-                    // console.log("pwd", pwd)
-                    var getBranch = spawn(`cd ${pwd} "$@" && git config credential.helper store`, {
-                        shell: true
-                    });
+                cmdToExecDeployCommand.stdout.on('data', function (data) {
+                    data = data.toString()
+                    console.log("data", data)
 
-                    getBranch.stdout.on('data', function (data) {
-                        return res("successful")
-                    })
                 })
-            } catch (error) {
-                return comm.showError(error)
-            }
+                cmdToExecDeployCommand.stdout.on("end", function (data) {
+                    console.log("end----", data)
+                })
+                cmdToExecDeployCommand.stdout.on("close", function (data) {
+                    console.log("close----", data)
+                })
+                cmdToExecDeployCommand.stdout.on("error", function (data) {
+                    console.log("erro----", data)
+                })
+            })
+
+
+        } catch (error) {
+            console.log("error", error)
+            return comm.showError(error)
+        }
+    },
+    store: async function () {
+        // return new Promise((res, rej) => {
+        try {
+            var cmdToGetPWD = spawn(`pwd`, {
+                shell: true
+            });
+
+            cmdToGetPWD.stdout.on('data', function (data) {
+                let pwd = comm.addEscapeToSpace(data.toString().trim())
+                // console.log("pwd", pwd)
+                var getBranch = spawn(`cd ${pwd} "$@" && git config credential.helper store`, {
+                    shell: true
+                });
+
+                getBranch.stdout.on('data', function (data) {
+                    return res("successful")
+                })
+            })
+        } catch (error) {
+            return comm.showError(error)
+        }
         // })
 
     },
@@ -113,40 +161,69 @@ module.exports = {
             if (await comm.confirmOptions(`Do you want to Shutdown laptop`)) {
                 let kill_process = require("./kill_process")
                 let kill_data = await kill_process.kill(["-a", "-f"])
-                let counter = 3
-                process.stdout.write(chalk.hex(comm.hexColors.blue)("\n Shutting Down "))
-                const intervalObj = setInterval(() => {
-                    process.stdout.write(chalk.hex(comm.hexColors.blue)("∙"));
-                    if (counter == 0) {
-                        clearInterval(intervalObj);
-                        console.log(chalk.hex(comm.hexColors.yellow)("\n Bye :)"))
-                        let shutdown = spawn(`systemctl poweroff -i`, {
-                            shell: true
-                        })
-                        shutdown.stdout.on('data', function (data) {
-                        });
-                    }
-                    counter--
-                }, 1000);
+                setTimeout(() => {
+                    self.finalShutdown()
+                }, 1000)
             } else {
                 return comm.showTerminationMsg("ShutDown Process terminated.")
             }
         } catch (error) {
-            return comm.showError(error)
+            self.finalShutdown()
         }
     },
 
+    finalShutdown: async function () {
+        let counter = 3
+        process.stdout.write(chalk.hex(comm.hexColors.blue)("\n Shutting Down "))
+        const intervalObj = setInterval(() => {
+            process.stdout.write(chalk.hex(comm.hexColors.blue)("∙"));
+            if (counter == 0) {
+                clearInterval(intervalObj);
+                console.log(chalk.hex(comm.hexColors.yellow)("\n Bye :)"))
+                let shutdown = spawn(`systemctl poweroff -i`, {
+                    shell: true
+                })
+                shutdown.stdout.on('data', function (data) {
+                });
+            }
+            counter--
+        }, 1000);
+    },
+    openKubenav: async function () {
+
+        // console.log(`--s-------.${comm.kubenavPath}`)
+        let kubenav = spawn(`cd "$@" && .${comm.kubenavPath} &> /dev/null &`, {
+            shell: true,
+            detached: true,
+            stdio: 'ignore',
+        })
+        kubenav.unref()
+        // kubenav.stdout.on('data', function (data) {
+        // });
+    },
+    openJmeter: async function () {
+
+        // console.log(`--s-------.${comm.jmeterPath}`)
+        let kubenav = spawn(`cd "$@" && .${comm.jmeterPath}`, {
+            shell: true,
+            detached: true,
+            stdio: 'ignore',
+        })
+        kubenav.unref()
+        // kubenav.stdout.on('data', function (data) {
+        // });
+    },
     show: async function (command, filtetParam) {
         try {
             if (command == "whoami" || command == "alias") {
                 let fileName = (command == "whoami") ? ("config.json") : ("alias.json")
-                let finalData = await comm.readFile(fileName)
+                let finalData = await comm.readFileFS(fileName)
                 console.log(finalData)
             } else {
-                let wmioFileName = await comm.getFileList(filtetParam, true)
+                let wmioFileName = await comm.getFileListFs(filtetParam, true)
                 if (wmioFileName.length) {
                     let selectedOpt = await comm.showOptions(wmioFileName, "Select the File view.")
-                    let finalData = await comm.readFile(selectedOpt)
+                    let finalData = await comm.readFileFS(selectedOpt)
                     console.log(finalData)
                 } else {
                     return comm.showError("No records found..")
@@ -158,7 +235,9 @@ module.exports = {
     },
 
     create: async function (param) {
-        // console.log("param-->", param)
+
+        // console.log("param-->", comm.cleanedArray(param))
+
         try {
             let questionsArr = [
                 {
@@ -181,9 +260,11 @@ module.exports = {
             if (newFileName.file_name == "config.js") {
                 return comm.showError("You cannot create file config.js")
             }
+            // console.log("----1--",param)
             if (await comm.checkIfFileExist(newFileName.file_name)) {
                 return comm.showError("File Name Already Exist.")
             }
+            newFileName.file_name = comm.ensureJsonExtension(newFileName.file_name)
             let selectedOpt
             if (param && Array.isArray(param) && param.length && param[1] && (param[1] == "--code" || param[1] == "--nano")) {
                 selectedOpt = "Open in text editor"
@@ -191,7 +272,7 @@ module.exports = {
                 let optionsArr = [
                     "Using Config file",
                     "Using Raw data",
-                    "Open in text editor"
+                    // "Open in text editor"
                 ]
                 selectedOpt = await comm.showOptions(optionsArr, "Select the method for new File Creation.")
             }
@@ -230,7 +311,7 @@ module.exports = {
             }
 
         } catch (error) {
-            // console.log("error", error)
+            console.log("error", error)
             // comm.showError(error)
         }
 

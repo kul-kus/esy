@@ -1,6 +1,8 @@
 let chalk = require("chalk")
 var comm = require("./../common")
 var spawn = require('child_process').spawn;
+var {exec} = require('child_process');
+
 let CurdOp = require("./../CURD_command")
 module.exports = {
     hexColors: {
@@ -20,15 +22,16 @@ module.exports = {
 
             let branchCommand = `git branch`
             if (filterParam) {
-                if (filterParam.includes("--all") || filterParam.includes("-a") || filterParam.includes("-all")) {
+                // if (filterParam.includes("--all") || filterParam.includes("-a") || filterParam.includes("-all")) {
                     branchCommand = branchCommand + " --all"
-                }
+                // }
             }
             let gitBool = true
             self.startSpinner(oraspinner, "Fetching Branch Details", "none")
             setTimeout(() => {
-
-                let getBranch = spawn(`cd ${pwd} "$@" && ${branchCommand}`, { shell: true });
+                let getBranch = exec(`cd ${pwd} & ${branchCommand}`,{
+                    shell: true
+                });
                 getBranch.stdout.on('error', function (data) {
                     return rej(`Get git branch failed Error-> ${data}`)
                 })
@@ -62,9 +65,9 @@ module.exports = {
     },
     pullChanges: function (pwd, currentBranch, oraspinner) {
         return new Promise((res, rej) => {
-            self.startSpinner(oraspinner, "Fetching Latest pull", "none")
+            self.startSpinner(oraspinner, "Fetching Latest pull ", "none")
             let pullGitBool = true
-            var pullChanges = spawn(`cd ${pwd} "$@" && git pull origin ${currentBranch}`, {
+            var pullChanges = exec(`cd ${pwd} & git pull origin ${currentBranch}`, {
                 shell: true
             });
 
@@ -74,12 +77,14 @@ module.exports = {
             })
 
             pullChanges.stdout.on('close', function (error) {
+                // console.log("error---->", error)
                 if (pullGitBool) {
-                    return rej(self.stopSpinnerAndShowMessage(oraspinner, "fail", "Pull command Failed. Please Check your connection and try again.", "pink"))
+                    return rej(self.stopSpinnerAndShowMessage(oraspinner, "fail", "Pull command Failed. Please Check your connection or credentials and try again.", "pink"))
                 }
             })
 
             pullChanges.stdout.on('data', function (pullData) {
+                // console.log("pullData", self.formatData(pullData))
                 self.stopSpinner(oraspinner)
                 pullGitBool = false
 
